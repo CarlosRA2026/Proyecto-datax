@@ -1,0 +1,109 @@
+import pandas as pd
+df=pd.read_csv(r'C:\Users\Lenovo\Downloads\Listado_de_Negocios_Verdes_20260316.csv')
+
+#limpieza de datos
+df.columns = df.columns.str.replace("\n"," ").str.strip()
+
+#normalizacion de datos
+df["DEPARTAMENTO (Donde se encuentra el Negocio Verde)"] = (
+    df["DEPARTAMENTO (Donde se encuentra el Negocio Verde)"]
+    .str.strip()
+    .str.upper())
+
+df["REGIÓN (Donde se encuentra el Negocio Verde)"] = (
+    df["REGIÓN (Donde se encuentra el Negocio Verde)"]
+    .str.strip()
+    .str.upper())
+
+df["Producto Principal (Que promueve el Negocio Verde)"] = (
+    df["Producto Principal (Que promueve el Negocio Verde)"]
+    .str.strip()
+    .str.upper())
+
+df["MUNICIPIO (Donde se encuentra el Negocio Verde)"] = (
+    df["MUNICIPIO (Donde se encuentra el Negocio Verde)"]
+    .str.strip()
+    .str.upper())
+
+df = df[(df["Producto Principal (Que promueve el Negocio Verde)"] != "No registra") &
+    (df["REGIÓN (Donde se encuentra el Negocio Verde)"] != "No registra")& 
+    (df["DEPARTAMENTO (Donde se encuentra el Negocio Verde)"] != "No registra")& 
+    (df["MUNICIPIO (Donde se encuentra el Negocio Verde)"] != "No registra")]
+
+    
+
+#exploración de datos
+df.head()
+df.info()
+df.describe()
+print(df.dtypes)
+
+print(df.isnull().sum())
+print(df.duplicated().sum())
+df=df.drop_duplicates()
+df.columns
+
+#analisis región
+negocios_region = df["REGIÓN (Donde se encuentra el Negocio Verde)"].value_counts()
+print(negocios_region)
+
+# análisis por producto principal
+negocios_producto = df["Producto Principal (Que promueve el Negocio Verde)"].value_counts()
+print(negocios_producto)
+
+#grafica regiones vs cantidad de negocios verdes
+import matplotlib.pyplot as plt
+ax=negocios_region.plot(kind="bar")
+
+plt.title("Número de Negocios Verdes por Región")
+plt.xlabel("Región")
+plt.ylabel("Cantidad de negocios")
+
+ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
+plt.tight_layout()
+
+plt.show()
+
+#grafica Productos
+top_productos = df["Producto Principal (Que promueve el Negocio Verde)"].value_counts().head(20)
+ax=top_productos.plot(kind="bar")
+
+plt.title("Top 20 Productos Principales con más Negocios Verdes")
+plt.xlabel("Producto Principal")
+plt.ylabel("Cantidad de negocios")
+
+ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
+plt.tight_layout()
+
+plt.show()
+
+
+#moda producto principal
+moda_producto = df["Producto Principal (Que promueve el Negocio Verde)"].mode()[0]
+print("moda del producto principal")
+print(moda_producto)
+
+#moda región
+moda_region = df["REGIÓN (Donde se encuentra el Negocio Verde)"].mode()[0]
+print("moda de la región")  
+print(moda_region)
+
+#media y mediana
+print(df.mean(numeric_only=True))
+print(df.median(numeric_only=True))
+print(df.var(numeric_only=True))
+print(df.std(numeric_only=True))
+
+#cruce de variables
+top_productos = df["Producto Principal (Que promueve el Negocio Verde)"].value_counts().head(5).index
+df_filtrado = df[df["Producto Principal (Que promueve el Negocio Verde)"].isin(top_productos)]
+tabla = pd.crosstab(
+df_filtrado["REGIÓN (Donde se encuentra el Negocio Verde)"],
+df_filtrado["Producto Principal (Que promueve el Negocio Verde)"])
+print(tabla)
+tabla.plot(kind="bar", stacked=True)
+
+plt.title("Top productos por región")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
